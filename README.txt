@@ -31,3 +31,5 @@ Legal
 Documentation
 
 See http://mahout.apache.org/.
+
+Modified version for a better integration between Solr and Mahout classifier.
