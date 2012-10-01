@@ -3,6 +3,7 @@ org.apache.mahout.utils.vectors.VectorDumper = vectordump : Dump vectors from a 
 org.apache.mahout.utils.clustering.ClusterDumper = clusterdump : Dump cluster output to text
 org.apache.mahout.utils.SequenceFileDumper = seqdumper : Generic Sequence File dumper
 org.apache.mahout.utils.vectors.lucene.Driver = lucene.vector : Generate Vectors from a Lucene index
+org.apache.mahout.utils.vectors.lucene.LabelDriver = lucene.labeledvector : Generate Labeled Vectors from a Lucene index
 org.apache.mahout.utils.vectors.arff.Driver = arff.vector : Generate Vectors from an ARFF file or directory
 org.apache.mahout.utils.vectors.RowIdJob = rowid : Map SequenceFile<Text,VectorWritable> to {SequenceFile<IntWritable,VectorWritable>, SequenceFile<IntWritable,Text>}
 org.apache.mahout.utils.SplitInput = split : Split Input data into test and train sets
