@@ -43,7 +43,6 @@ public class SequenceFileVectorWriter implements VectorWriter {
   
   @Override
   public long write(Iterable<Vector> iterable, long maxDocs) throws IOException {
-
     for (Vector point : iterable) {
       if (recNum >= maxDocs) {
         break;
@@ -57,7 +56,6 @@ public class SequenceFileVectorWriter implements VectorWriter {
   }
 
   public long writeAndLabel(LuceneIterable iterable, long maxDocs) throws IOException {
-
     for (Vector point : iterable) {
       if (recNum >= maxDocs) {
         break;

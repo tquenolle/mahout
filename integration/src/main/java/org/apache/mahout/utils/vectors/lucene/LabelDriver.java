@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 public final class LabelDriver {
 
-  private static final Logger log = LoggerFactory.getLogger(Driver.class);
+  private static final Logger log = LoggerFactory.getLogger(LabelDriver.class);
 
   private String luceneDir;
   private String outFile;
@@ -204,7 +204,7 @@ public final class LabelDriver {
       }
 
       if (cmdLine.hasOption(inputOpt)) { // Lucene case
-        Driver luceneDriver = new Driver();
+        LabelDriver luceneDriver = new LabelDriver();
         luceneDriver.setLuceneDir(cmdLine.getValue(inputOpt).toString());
 
         if (cmdLine.hasOption(maxOpt)) {
