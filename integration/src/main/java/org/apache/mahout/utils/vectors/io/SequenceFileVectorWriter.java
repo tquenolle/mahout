@@ -21,9 +21,12 @@ import java.io.IOException;
 
 import com.google.common.io.Closeables;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 
 
 /**
@@ -49,6 +52,22 @@ public class SequenceFileVectorWriter implements VectorWriter {
         writer.append(new LongWritable(recNum++), new VectorWritable(point));
       }
       
+    }
+    return recNum;
+  }
+
+  public long writeAndLabel(LuceneIterable iterable, long maxDocs) throws IOException {
+
+    for (Vector point : iterable) {
+      if (recNum >= maxDocs) {
+        break;
+      }
+      if (point != null) {
+        NamedVector tmp_point = (NamedVector) point;
+        writer.append(new Text("/" + tmp_point.getName() + "/" + recNum), new VectorWritable(point));
+        recNum++;
+      }
+
     }
     return recNum;
   }
