@@ -61,6 +61,7 @@ public final class LabelDriver {
   private String luceneDir;
   private String outFile;
   private String field;
+  private String labelField;
   private String idField;
   private String dictOut;
   private String weightType = "tfidf";
@@ -98,9 +99,9 @@ public final class LabelDriver {
 
     LuceneIterable iterable;
     if (norm == LuceneIterable.NO_NORMALIZING) {
-      iterable = new LuceneIterable(reader, idField, field, mapper, LuceneIterable.NO_NORMALIZING, maxPercentErrorDocs);
+      iterable = new LuceneIterable(reader, labelField, field, mapper, LuceneIterable.NO_NORMALIZING, maxPercentErrorDocs, idField);
     } else {
-      iterable = new LuceneIterable(reader, idField, field, mapper, norm, maxPercentErrorDocs);
+      iterable = new LuceneIterable(reader, labelField, field, mapper, norm, maxPercentErrorDocs, idField);
     }
 
     log.info("Output File: {}", outFile);
@@ -142,10 +143,16 @@ public final class LabelDriver {
         abuilder.withName("field").withMinimum(1).withMaximum(1).create()).withDescription(
         "The field in the index").withShortName("f").create();
 
+    Option labelFieldOpt = obuilder.withLongName("labelField").withRequired(false).withArgument(
+        abuilder.withName("labelField").withMinimum(1).withMaximum(1).create()).withDescription(
+        "The field in the index containing the label.  If null, then the Lucene internal doc "
+            + "id is used which is prone to error if the underlying index changes").create();
+
     Option idFieldOpt = obuilder.withLongName("idField").withRequired(false).withArgument(
         abuilder.withName("idField").withMinimum(1).withMaximum(1).create()).withDescription(
         "The field in the index containing the index.  If null, then the Lucene internal doc "
             + "id is used which is prone to error if the underlying index changes").create();
+
 
     Option dictOutOpt = obuilder.withLongName("dictOut").withRequired(true).withArgument(
         abuilder.withName("dictOut").withMinimum(1).withMaximum(1).create()).withDescription(
@@ -187,7 +194,7 @@ public final class LabelDriver {
     Option helpOpt = obuilder.withLongName("help").withDescription("Print out help").withShortName("h")
         .create();
 
-    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(idFieldOpt).withOption(
+    Group group = gbuilder.withName("Options").withOption(inputOpt).withOption(labelFieldOpt).withOption(idFieldOpt).withOption(
         outputOpt).withOption(delimiterOpt).withOption(helpOpt).withOption(fieldOpt).withOption(maxOpt)
         .withOption(dictOutOpt).withOption(powerOpt).withOption(maxDFPercentOpt)
         .withOption(weightOpt).withOption(minDFOpt).withOption(maxPercentErrorDocsOpt).create();
@@ -232,6 +239,10 @@ public final class LabelDriver {
           } else {
             luceneDriver.setNorm(Double.parseDouble(power));
           }
+        }
+
+        if (cmdLine.hasOption(labelFieldOpt)) {
+          luceneDriver.setLabelField(cmdLine.getValue(labelFieldOpt).toString());
         }
 
         if (cmdLine.hasOption(idFieldOpt)) {
@@ -294,6 +305,10 @@ public final class LabelDriver {
 
   public void setNorm(double norm) {
     this.norm = norm;
+  }
+
+  public void setLabelField(String labelField) {
+    this.labelField = labelField;
   }
 
   public void setIdField(String idField) {

@@ -44,14 +44,17 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
 
   private final IndexReader indexReader;
   private final String field;
-  private final String idField;
-  private final FieldSelector idFieldSelector;
+  private final String labelField;
+  private final FieldSelector labelFieldSelector;
   private final VectorMapper mapper;
   private final double normPower;
   private final TermDocs termDocs;
 
   private int numErrorDocs = 0;
   private int maxErrorDocs = 0;
+  private boolean identify = false;
+  private FieldSelector idFieldSelector;
+  private String idField;
   private final Bump125 bump = new Bump125();
   private long nextLogRecord = bump.increment();
   private int skippedErrorMessages = 0;
@@ -60,17 +63,17 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
    * Produce a LuceneIterable that can create the Vector plus normalize it.
    *
    * @param indexReader {@link IndexReader} to read the documents from.
-   * @param idField field containing the id. May be null.
+   * @param labelField field containing the id. May be null.
    * @param field  field to use for the Vector
    * @param mapper {@link VectorMapper} for creating {@link Vector}s from Lucene's TermVectors.
    * @param normPower the normalization value. Must be nonnegative, or {@link LuceneIterable#NO_NORMALIZING}
    */
   public LuceneIterator(IndexReader indexReader,
-                        String idField,
+                        String labelField,
                         String field,
                         VectorMapper mapper,
                         double normPower) throws IOException {
-    this(indexReader, idField, field, mapper, normPower, 0.0);
+    this(indexReader, labelField, field, mapper, normPower, 0.0, null);
   }
 
   /**
@@ -78,24 +81,34 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
    * @param maxPercentErrorDocs most documents that will be tolerated without a term freq vector. In [0,1].
    */
   public LuceneIterator(IndexReader indexReader,
-                        String idField,
+                        String labelField,
                         String field,
                         VectorMapper mapper,
                         double normPower,
-                        double maxPercentErrorDocs) throws IOException {
+                        double maxPercentErrorDocs,
+                        String idField) throws IOException {
     // term docs(null) is a better way of iterating all the docs in Lucene
     Preconditions.checkArgument(normPower == LuceneIterable.NO_NORMALIZING || normPower >= 0,
                                 "If specified normPower must be nonnegative", normPower);
     Preconditions.checkArgument(maxPercentErrorDocs >= 0.0 && maxPercentErrorDocs <= 1.0);
-    idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
+    labelFieldSelector = new SetBasedFieldSelector(Collections.singleton(labelField), Collections.<String>emptySet());
     this.indexReader = indexReader;
-    this.idField = idField;
+    this.labelField = labelField;
     this.field = field;
     this.mapper = mapper;
     this.normPower = normPower;
     // term docs(null) is a better way of iterating all the docs in Lucene
     this.termDocs = indexReader.termDocs(null);
     this.maxErrorDocs = (int) (maxPercentErrorDocs * indexReader.numDocs());
+    if (idField != null) {
+      this.enableIdentify(idField);
+    }
+  }
+
+  public void enableIdentify(String idField) {
+    this.identify = true;
+    this.idField = idField;
+    this.idFieldSelector = new SetBasedFieldSelector(Collections.singleton(idField), Collections.<String>emptySet());
   }
 
   @Override
@@ -119,7 +132,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
           }
           if (numErrorDocs >= nextLogRecord) {
             if (skippedErrorMessages == 0) {
-              log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(idField), field);
+              log.warn("{} does not have a term vector for {}", indexReader.document(doc).get(labelField), field);
             } else {
               log.warn("{} documents do not have a term vector for {}", numErrorDocs, field);
             }
@@ -140,8 +153,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
         return null;
       }
       String name;
-      if (idField != null) {
-        name = indexReader.document(doc, idFieldSelector).get(idField);
+      if (labelField != null) {
+        name = indexReader.document(doc, labelFieldSelector).get(labelField);
       } else {
         name = String.valueOf(doc);
       }
@@ -150,6 +163,12 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       } else {
         result = new NamedVector(result.normalize(normPower), name);
       }
+
+      if (identify) {
+        NamedVector tmp_result = (NamedVector) result;
+        tmp_result.setId(indexReader.document(doc, idFieldSelector).get(idField));
+      }
+
       return result;
     } catch (IOException ioe) {
       throw new IllegalStateException(ioe);

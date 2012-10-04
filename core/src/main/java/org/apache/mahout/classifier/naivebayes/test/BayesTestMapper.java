@@ -61,6 +61,6 @@ public class BayesTestMapper extends Mapper<Text, VectorWritable, Text, VectorWr
   protected void map(Text key, VectorWritable value, Context context) throws IOException, InterruptedException {
     Vector result = classifier.classifyFull(value.get());
     //the key is the expected value
-    context.write(new Text(SLASH.split(key.toString())[1]), new VectorWritable(result));
+    context.write(new Text(key.toString()), new VectorWritable(result));
   }
 }
