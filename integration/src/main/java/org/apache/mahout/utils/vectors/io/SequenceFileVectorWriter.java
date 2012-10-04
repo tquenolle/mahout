@@ -62,7 +62,12 @@ public class SequenceFileVectorWriter implements VectorWriter {
       }
       if (point != null) {
         NamedVector tmp_point = (NamedVector) point;
-        writer.append(new Text("/" + tmp_point.getName() + "/" + recNum), new VectorWritable(point));
+        String id = tmp_point.getId();
+        if (id != null) {
+          writer.append(new Text("/" + tmp_point.getName() + "/" + id), new VectorWritable(point));
+        } else {
+          writer.append(new Text("/" + tmp_point.getName() + "/" + recNum), new VectorWritable(point));
+        }
         recNum++;
       }
 

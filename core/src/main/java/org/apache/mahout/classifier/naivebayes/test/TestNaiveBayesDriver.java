@@ -62,6 +62,8 @@ public class TestNaiveBayesDriver extends AbstractJob {
   public static final String LABEL_KEY = "labels";
   public static final String COMPLEMENTARY = "class"; //b for bayes, c for complementary
   private static final Pattern SLASH = Pattern.compile("/");
+  private static double seuil = -1000.0;
+  private static boolean debug = false;
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new TestNaiveBayesDriver(), args);
@@ -76,14 +78,22 @@ public class TestNaiveBayesDriver extends AbstractJob {
     addOption(buildOption("testComplementary", "c", "test complementary?", false, false, String.valueOf(false)));
     addOption(buildOption("runSequential", "seq", "run sequential?", false, false, String.valueOf(false)));
     addOption("labelIndex", "l", "The path to the location of the label index", true);
+    addOption("seuil", "s", "The low limit of score", true);
+    addOption(buildOption("debug", "d", "debug misclassified?", false, false, String.valueOf(false)));
     Map<String, List<String>> parsedArgs = parseArguments(args);
     if (parsedArgs == null) {
       return -1;
     }
+
+    if (hasOption("seuil")) {
+        String seuil_s = getOption("seuil");
+        seuil = -((double) (Integer.parseInt(seuil_s)));
+    }
+    System.out.println(getOption("seuil"));
     if (hasOption(DefaultOptionCreator.OVERWRITE_OPTION)) {
       HadoopUtil.delete(getConf(), getOutputPath());
     }
-    
+    debug = hasOption("debug");
     boolean complementary = hasOption("testComplementary");
     boolean sequential = hasOption("runSequential");
     if (sequential) {
@@ -101,6 +111,7 @@ public class TestNaiveBayesDriver extends AbstractJob {
       Text key = new Text();
       VectorWritable vw = new VectorWritable();
       while (reader.next(key, vw)) {
+        System.out.println(key.toString());
         writer.append(new Text(SLASH.split(key.toString())[1]),
             new VectorWritable(classifier.classifyFull(vw.get())));
       }
@@ -154,9 +165,17 @@ public class TestNaiveBayesDriver extends AbstractJob {
           bestIdx = element.index();
         }
       }
-      if (bestIdx != Integer.MIN_VALUE) {
+      if (debug && (Integer.parseInt(SLASH.split(pair.getFirst().toString())[1]) != Integer.parseInt(labelMap.get(bestIdx)))) {
+        System.out.println("Classification of: " + SLASH.split(pair.getFirst().toString())[2]);
+        System.out.println("Guessed: " + labelMap.get(bestIdx)  + " Real cat: " + Integer.parseInt(SLASH.split(pair.getFirst().toString())[1]));
+        System.out.println(bestScore);
+      }
+      if (bestIdx != Integer.MIN_VALUE && bestScore > seuil) {
         ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
-        analyzer.addInstance(pair.getFirst().toString(), classifierResult);
+        analyzer.addInstance(SLASH.split(pair.getFirst().toString())[1], classifierResult);
+      }
+      else if (debug) {
+        System.out.println("REJECTED " + bestScore);
       }
     }
   }
