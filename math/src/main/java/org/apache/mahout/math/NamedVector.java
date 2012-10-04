@@ -26,6 +26,7 @@ public class NamedVector implements Vector {
 
   private Vector delegate;
   private String name;
+  private String id;
 
   public NamedVector() {
   }
@@ -45,6 +46,14 @@ public class NamedVector implements Vector {
 
   public String getName() {
     return name;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getId() {
+    return this.id;
   }
 
   public Vector getDelegate() {

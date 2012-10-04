@@ -32,47 +32,54 @@ public final class LuceneIterable implements Iterable<Vector> {
 
   private final IndexReader indexReader;
   private final String field;
-  private final String idField;
+  private final String labelField;
+  private String idField = null;
   private final VectorMapper mapper;
   private final double normPower;
   private final double maxPercentErrorDocs;
 
-  public LuceneIterable(IndexReader reader, String idField, String field, VectorMapper mapper) {
-    this(reader, idField, field, mapper, NO_NORMALIZING);
+  public LuceneIterable(IndexReader reader, String labelField, String field, VectorMapper mapper) {
+    this(reader, labelField, field, mapper, NO_NORMALIZING);
   }
-  
-  public LuceneIterable(IndexReader indexReader, String idField, String field, VectorMapper mapper, double normPower) {
-    this(indexReader, idField, field, mapper, normPower, 0);
+
+  public LuceneIterable(IndexReader indexReader, String labelField, String field, VectorMapper mapper, double normPower) {
+    this(indexReader, labelField, field, mapper, normPower, 0);
   }
-  
+
+  public LuceneIterable(IndexReader indexReader, String labelField, String field, VectorMapper mapper, double normPower, double maxPercentErrorDocs) {
+    this(indexReader, labelField, field, mapper, normPower, maxPercentErrorDocs, null);
+  }
+
   /**
    * Produce a LuceneIterable that can create the Vector plus normalize it.
    * 
    * @param indexReader {@link org.apache.lucene.index.IndexReader} to read the documents from.
-   * @param idField field containing the id. May be null.
+   * @param labelField field containing the id. May be null.
    * @param field  field to use for the Vector
    * @param mapper {@link VectorMapper} for creating {@link Vector}s from Lucene's TermVectors.
    * @param normPower the normalization value. Must be nonnegative, or {@link #NO_NORMALIZING}
    * @param maxPercentErrorDocs the percentage of documents in the lucene index that can have a null term vector
    */
   public LuceneIterable(IndexReader indexReader,
-                        String idField,
+                        String labelField,
                         String field,
                         VectorMapper mapper,
                         double normPower,
-                        double maxPercentErrorDocs) {
+                        double maxPercentErrorDocs,
+                        String idField) {
     this.indexReader = indexReader;
-    this.idField = idField;
+    this.labelField = labelField;
     this.field = field;
     this.mapper = mapper;
     this.normPower = normPower;
+    this.idField = idField;
     this.maxPercentErrorDocs = maxPercentErrorDocs;
   }
-  
+
   @Override
   public Iterator<Vector> iterator() {
     try {
-      return new LuceneIterator(indexReader, idField, field, mapper, normPower, maxPercentErrorDocs);
+      return new LuceneIterator(indexReader, labelField, field, mapper, normPower, maxPercentErrorDocs, idField);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
