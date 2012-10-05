@@ -85,7 +85,8 @@ public class ResultAnalyzer {
     double percentageCorrect = (double) 100 * correctlyClassified / totalClassified;
     double percentageIncorrect = (double) 100 * incorrectlyClassified / totalClassified;
     NumberFormat decimalFormatter = new DecimalFormat("0.####");
-    
+    System.out.println(totalClassified);
+    System.out.println(percentageCorrect);
     returnString.append(StringUtils.rightPad("Correctly Classified Instances", 40)).append(": ").append(
       StringUtils.leftPad(Integer.toString(correctlyClassified), 10)).append('\t').append(
       StringUtils.leftPad(decimalFormatter.format(percentageCorrect), 10)).append("%\n");

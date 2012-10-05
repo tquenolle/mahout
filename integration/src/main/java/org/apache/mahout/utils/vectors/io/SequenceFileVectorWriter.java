@@ -16,7 +16,7 @@
  */
 
 package org.apache.mahout.utils.vectors.io;
-
+import java.util.*;
 import java.io.IOException;
 
 import com.google.common.io.Closeables;
@@ -37,6 +37,7 @@ import org.apache.mahout.utils.vectors.lucene.LuceneIterable;
 public class SequenceFileVectorWriter implements VectorWriter {
   private final SequenceFile.Writer writer;
   private long recNum = 0;
+  private static final Set<Integer> EXCLUDE_JOBBOARD_LIST = new HashSet<Integer>(Arrays.asList(new Integer[] {1,3,4,5,6,7,14,15,16,17,23,26,32,33,34,35,36,37,112,125,126,385,745,747,821,1542,1977,2113,2713}));
   public SequenceFileVectorWriter(SequenceFile.Writer writer) {
     this.writer = writer;
   }
@@ -63,6 +64,10 @@ public class SequenceFileVectorWriter implements VectorWriter {
       if (point != null) {
         NamedVector tmp_point = (NamedVector) point;
         String id = tmp_point.getId();
+//        if (EXCLUDE_JOBBOARD_LIST.contains(tmp_point.getJobboardId())) {
+//            System.out.println("Excluded");
+//            continue;
+//        }
         if (id != null) {
           writer.append(new Text("/" + tmp_point.getName() + "/" + id), new VectorWritable(point));
         } else {

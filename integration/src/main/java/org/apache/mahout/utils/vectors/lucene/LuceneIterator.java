@@ -54,6 +54,8 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
   private int maxErrorDocs = 0;
   private boolean identify = false;
   private FieldSelector idFieldSelector;
+  private FieldSelector jbidFieldSelector = new SetBasedFieldSelector(Collections.singleton("jobboard_id"), Collections.<String>emptySet());
+
   private String idField;
   private final Bump125 bump = new Bump125();
   private long nextLogRecord = bump.increment();
@@ -167,6 +169,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       if (identify) {
         NamedVector tmp_result = (NamedVector) result;
         tmp_result.setId(indexReader.document(doc, idFieldSelector).get(idField));
+        tmp_result.setJobboardId(indexReader.document(doc, jbidFieldSelector).get("jobboard_id"));
       }
 
       return result;

@@ -27,6 +27,7 @@ public class NamedVector implements Vector {
   private Vector delegate;
   private String name;
   private String id;
+  private int jobboard_id;
 
   public NamedVector() {
   }
@@ -55,6 +56,19 @@ public class NamedVector implements Vector {
   public String getId() {
     return this.id;
   }
+
+  public void setJobboardId(String jid) {
+    if (jid != null) {
+        int r = Integer.parseInt(jid);
+        this.jobboard_id = r;
+    }
+  }
+
+  public int getJobboardId() {
+    return this.jobboard_id;
+  }
+
+
 
   public Vector getDelegate() {
     return delegate;
