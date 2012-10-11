@@ -137,6 +137,18 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.solr.common</groupId>
+      <artifactId>apache-solr-core</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.solr.common.util</groupId>
+      <artifactId>apache-solr-utils</artifactId>
+      <version>3.6.0</version>
+    </dependency>
+
+    <dependency>
         <groupId>org.apache.lucene</groupId>
         <artifactId>lucene-benchmark</artifactId>
     </dependency>
