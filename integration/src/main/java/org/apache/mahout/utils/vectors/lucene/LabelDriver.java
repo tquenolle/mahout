@@ -117,7 +117,7 @@ public final class LabelDriver {
     File dictOutFile = new File(dictOut);
     log.info("Dictionary Output file: {}", dictOutFile);
     Writer writer = Files.newWriter(dictOutFile, Charsets.UTF_8);
-    DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field);
+    DelimitedTermInfoWriter tiWriter = new DelimitedTermInfoWriter(writer, delimiter, field, reader.numDocs());
     try {
       tiWriter.write(termInfo);
     } finally {

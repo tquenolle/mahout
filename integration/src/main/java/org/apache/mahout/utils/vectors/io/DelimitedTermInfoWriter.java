@@ -33,11 +33,17 @@ public class DelimitedTermInfoWriter implements TermInfoWriter {
   private final Writer writer;
   private final String delimiter;
   private final String field;
-  
-  public DelimitedTermInfoWriter(Writer writer, String delimiter, String field) {
+  private final int numDocs;
+
+  public DelimitedTermInfoWriter(Writer writer, String delimiter, String field, int numDocs) {
+    this.numDocs = numDocs;
     this.writer = writer;
     this.delimiter = delimiter;
     this.field = field;
+  }
+
+  public DelimitedTermInfoWriter(Writer writer, String delimiter, String field) {
+      this(writer, delimiter, field, 0);
   }
   
   @Override
@@ -49,6 +55,10 @@ public class DelimitedTermInfoWriter implements TermInfoWriter {
       writer.write('\n');
       writer.write("#term" + delimiter + "doc freq" + delimiter + "idx");
       writer.write('\n');
+      if (numDocs > 0) {
+        writer.write("#numDocs " + numDocs);
+        writer.write('\n');
+      }
       while (entIter.hasNext()) {
         TermEntry entry = entIter.next();
         writer.write(entry.getTerm());
