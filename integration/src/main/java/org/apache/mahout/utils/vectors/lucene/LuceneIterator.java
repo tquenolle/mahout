@@ -128,7 +128,7 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
         termFreqVector = indexReader.getTermFreqVector(doc, field);
         if (termFreqVector == null) {
           numErrorDocs++;
-          if (numErrorDocs >= maxErrorDocs) {
+          if (numErrorDocs >= 1000) {
             log.error("There are too many documents that do not have a term vector for {}", field);
             throw new IllegalStateException("There are too many documents that do not have a term vector for " + field);
           }
