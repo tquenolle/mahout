@@ -70,7 +70,6 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
     Weight weight = new TFIDF();
     int total = 0;
     int correctly = 0;
-    int incorrectly = 0;
     int numDocs;
     private static final Pattern TAB_PATTERN = Pattern.compile("\t");
     private static final Pattern SPACE = Pattern.compile(" ");
@@ -221,8 +220,6 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             total++;
             if (real == found) {
                 correctly++;
-            } else {
-                incorrectly++;
             }
             if (debug) {
                 System.out.println("Was a: " + real);
