@@ -65,6 +65,8 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
     Map<Integer, String> labelMap;
     String current_cat;
     String outputField;
+    String modelVersionField;
+    String modelVersion;
     String defaultCategory;
     boolean debug = false;
     Weight weight = new TFIDF();
@@ -97,6 +99,9 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
         setConf(new Configuration());
         params = SolrParams.toSolrParams((NamedList) args);
         outputField = getOption("outputField");
+        modelVersionField = getOption("modelVersionField");
+        modelVersion = getOption("modelVersion");
+        System.out.println("Using model version: " + modelVersion);
         debug = (getOption("debug").startsWith("true"));
         String defaultCategory = getOption("defaultCategory");
         try {
@@ -207,6 +212,7 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             if (tokens.length > 0)
                 guess_cat = classify(tokens);
             doc.addField(outputField, guess_cat);
+            doc.addField(modelVersionField, modelVersion);
             super.processAdd(cmd);
         }
 
