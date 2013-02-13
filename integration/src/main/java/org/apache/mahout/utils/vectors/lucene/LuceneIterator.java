@@ -160,6 +160,9 @@ public final class LuceneIterator extends AbstractIterator<Vector> {
       } else {
         name = String.valueOf(doc);
       }
+      if (name == null) {
+          return null;
+      }
       if (normPower == LuceneIterable.NO_NORMALIZING) {
         result = new NamedVector(result, name);
       } else {

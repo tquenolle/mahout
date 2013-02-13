@@ -165,14 +165,18 @@ public class TestNaiveBayesDriver extends AbstractJob {
           bestIdx = element.index();
         }
       }
-      if (debug && (Integer.parseInt(SLASH.split(pair.getFirst().toString())[1]) != Integer.parseInt(labelMap.get(bestIdx)))) {
-        System.out.println("Classification of: " + SLASH.split(pair.getFirst().toString())[2]);
-        System.out.println("Guessed: " + labelMap.get(bestIdx)  + " Real cat: " + Integer.parseInt(SLASH.split(pair.getFirst().toString())[1]));
-        System.out.println(bestScore);
-      }
+//      if (debug && (Integer.parseInt(SLASH.split(pair.getFirst().toString())[1]) != Integer.parseInt(labelMap.get(bestIdx)))) {
+//        System.out.println("Classification of: " + SLASH.split(pair.getFirst().toString())[2]);
+//        System.out.println("Guessed: " + labelMap.get(bestIdx)  + " Real cat: " + Integer.parseInt(SLASH.split(pair.getFirst().toString())[1]));
+//        System.out.println(bestScore);
+//      }
       if (bestIdx != Integer.MIN_VALUE && bestScore > seuil) {
         ClassifierResult classifierResult = new ClassifierResult(labelMap.get(bestIdx), bestScore);
-        analyzer.addInstance(SLASH.split(pair.getFirst().toString())[1], classifierResult);
+        try {
+            analyzer.addInstance(SLASH.split(pair.getFirst().toString())[1], classifierResult);
+        } catch (Exception e) {
+            System.out.println("Label failed " + classifierResult.getLabel());
+        }
       }
       else if (debug) {
         System.out.println("REJECTED " + bestScore);
