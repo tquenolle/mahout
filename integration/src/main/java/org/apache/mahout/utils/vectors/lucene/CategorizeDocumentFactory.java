@@ -68,6 +68,7 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
     String modelVersionField;
     String modelVersion;
     String defaultCategory;
+    String scoreField;
     boolean debug = false;
     Weight weight = new TFIDF();
     int total = 0;
@@ -104,6 +105,7 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
         System.out.println("Using model version: " + modelVersion);
         debug = (getOption("debug").startsWith("true"));
         String defaultCategory = getOption("defaultCategory");
+        scoreField = getOption("scoreField");
         try {
             model = NaiveBayesModel.materialize(new Path(getOption("model")), getConf());
             classifier = new StandardNaiveBayesClassifier(model);
@@ -206,12 +208,19 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             SolrInputDocument doc = cmd.getSolrInputDocument();
             // Allow using multiple fields as input to mimic the copyfield behaviour.
             String inputFields = getOption("inputField");
+            String scoreField = getOption("scoreField");
+
             String guess_cat = defaultCategory;
+            String guess_score = "";
             String content = getClassificationContent(doc, inputFields);
             String[] tokens = getFilteredTokens(content);
-            if (tokens.length > 0)
-                guess_cat = classify(tokens);
+            if (tokens.length > 0) {
+                String class_result[] = classify(tokens);
+                guess_cat = class_result[0];
+                guess_score = class_result[1];
+            }
             doc.addField(outputField, guess_cat);
+            doc.addField(scoreField, guess_score);
             doc.addField(modelVersionField, modelVersion);
             super.processAdd(cmd);
         }
@@ -221,8 +230,8 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
              * Increment counters for correctness computation.
              */
 
-            int real = Integer.parseInt(current_cat);
-            int found = Integer.parseInt(f);
+            String real = current_cat;
+            String found = f;
             total++;
             if (real == found) {
                 correctly++;
@@ -233,7 +242,7 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             }
         }
 
-        private String classify(String[] ts) {
+        private String[] classify(String[] ts) {
             /**
              * Return the guessed category's label.
              * Term Frequency computation.
@@ -272,7 +281,8 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             if (debug)
                 System.out.println("Classified as: " + labelMap.get(bestIdx));
             stats(labelMap.get(bestIdx));
-            return labelMap.get(bestIdx);
+            String result[] = {labelMap.get(bestIdx), String.valueOf(bestScore)};
+            return result;
         }
 
         private String getClassificationContent(SolrInputDocument doc, String inputFields) {
@@ -283,7 +293,6 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
 
             StringTokenizer spliter = new StringTokenizer(inputFields, ",");
             String result = "";
-            current_cat = ((String) doc.getFieldValue("mail_category"));
             while (spliter.hasMoreTokens()) {
                 String field_name = spliter.nextToken();
                 result += getFieldValues(doc, field_name);
