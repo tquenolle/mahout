@@ -271,9 +271,11 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             Vector scores = classifier.classifyFull(vec.normalize());
             int bestIdx = Integer.MIN_VALUE;
             double bestScore = Long.MIN_VALUE;
+            double prevBestScore = Long.MIN_VALUE;
             for (Iterator<Vector.Element> score = scores.iterator(); score.hasNext();) {
                 Vector.Element element = score.next();
                 if (element.get() > bestScore) {
+                    prevBestScore = bestScore;
                     bestScore = element.get();
                     bestIdx = element.index();
                 }
@@ -281,7 +283,7 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
             if (debug)
                 System.out.println("Classified as: " + labelMap.get(bestIdx));
             stats(labelMap.get(bestIdx));
-            String result[] = {labelMap.get(bestIdx), String.valueOf(bestScore)};
+            String result[] = {labelMap.get(bestIdx), String.valueOf(bestScore - prevBestScore)};
             return result;
         }
 
