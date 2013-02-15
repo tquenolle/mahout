@@ -278,6 +278,8 @@ public class CategorizeDocumentFactory extends UpdateRequestProcessorFactory imp
                     prevBestScore = bestScore;
                     bestScore = element.get();
                     bestIdx = element.index();
+                } else if (element.get() > prevBestScore) {
+                    prevBestScore = element.get();
                 }
             }
             if (debug)
